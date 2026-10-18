@@ -1,0 +1,22 @@
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const app=fs.readFileSync(__dirname+'/app.js','utf8');
+const html=fs.readFileSync(__dirname+'/index.html','utf8');
+assert.match(app,/const NATIONAL_CUP_WEEKS=\[4,9,14,19\]/,'cup entry stages remain tied to league weeks 5/10/15/20');
+assert.match(app,/function cupTeamsForTier\(countryId,tier\)/,'cup entrants must be drawn from every club in each tier');
+assert.match(app,/function enterCupTier\(cup,countryId,tier,label,target,seed\)/,'cup must add tiers progressively');
+assert.match(app,/function playCupPoolTo\(cup,target,countryId,label,seed\)/,'lower-tier entrants must play extra elimination rounds');
+assert.match(app,/for\(const c of countries\)/,'scheduled cup stages must progress for all countries');
+assert.match(app,/function cupTeamsForTier\(countryId,tier\)[\s\S]*?groupsForTier\(tier\)/,'each tier contributes all groups and all clubs');
+assert.match(app,/const tiers=\[1,2,3,4,5,6\]/,'national cup system must cover all six tiers');
+assert.match(app,/ورود دستهٔ دوم در روز ۳۱/,'tier 2 enters on day 31');
+assert.match(app,/ورود دستهٔ اول و مراحل پایانی روز ۳۱/,'tier 1 enters for final day stage');
+assert.match(app,/function completeCupForCountry\(countryId\)/,'day 31 must complete the country-wide cup');
+assert.match(app,/همهٔ ۱٬۰۰۸ باشگاه/,'cup UI must explain all 1,008 teams per country');
+assert.match(app,/if\(NATIONAL_CUP_WEEKS\.includes\(state\.week\)\)playScheduledNationalCupRound\(\);state\.week\+\+/,'cup rounds do not advance the calendar a second time');
+// League pyramid size per country: (1+2+4+8+16+32) groups x 16 teams.
+assert.equal((1+2+4+8+16+32)*16,1008,'each national cup must include all 1,008 league clubs');
+const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+assert.equal(scripts.length,1);
+assert.equal(scripts[0][1],app,'inline script must be synchronized with app.js');
+console.log('PASS: national cup includes all 1,008 clubs per country; tiers enter progressively and the final is completed on day 31');

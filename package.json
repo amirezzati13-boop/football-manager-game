@@ -1,0 +1,14 @@
+{
+  "name": "football-manager-aria-web",
+  "version": "0.6.0",
+  "private": true,
+  "description": "Football Manager Aria web MVP with accounts and cloud saves",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check web-auth.js && node --check app.js",
+    "test": "node test_full_season.js && node test_playoff_scenarios.js && node test_season_movement.js && node test_storage_layer.js && node test_web_auth.js && node test_match_substitutions.js && node test_pre_match_analyst.js && node test_post_match_analysis.js && node test_daily_fitness_training.js && node test_staff_management.js && node test_medical_academy_effects.js && node test_player_attributes_transfer.js && node test_transfer_contract_accounting.js && node test_finance_ledger.js && node test_rewards_idempotency.js && node test_save_integrity.js && node test_save_migration.js && node test_multi_season_economy.js && node test_integrated_multiseason_economy.js && node test_annual_wages_age_and_matchday.js && node test_cup_calendar_schedule.js && node test_ucl_qualification_snapshot.js && node test_ucl_multiseason_history.js && node test_ucl_two_season_lifecycle.js && node test_ucl_settlement_restart.js && node test_browser_http_smoke.js && node test_responsive_ui_audit.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

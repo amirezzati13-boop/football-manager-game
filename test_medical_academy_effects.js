@@ -1,0 +1,18 @@
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const app=fs.readFileSync(path.join(__dirname,'app.js'),'utf8');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+assert.match(app,/function recoverInjuriesWeekly\(\)/,'weekly injury recovery must exist');
+assert.match(app,/doctorLevel>=7\?2:1/,'higher medical staff levels must shorten recovery duration');
+assert.match(app,/function applyPostMatchInjuries\(seed\)/,'post-match injury check must exist');
+assert.match(app,/doctorLevel\*0\.001/,'medical staff must reduce injury risk');
+assert.match(app,/injuryWeeksRemaining/,'injury state must be stored on player');
+assert.match(app,/available=squad\.filter\(p=>Math\.max\(0,Number\(p\.injuryWeeksRemaining\)\|\|0\)===0\)/,'injured players must be excluded from starting lineup');
+assert.match(app,/player is injured|بازیکن مصدوم است/,'injured players must not train manually');
+assert.match(app,/const chance=Math\.min\(\.9,\.55\+level\*\.035\)/,'academy coach must improve manual academy training chance');
+assert.match(app,/تمرین آکادمی فقط با فشردن دکمه توسط مدیر اجرا می‌شود/,'academy training must remain manual');
+const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+assert.equal(scripts.length,1,'exactly one inline app script expected');
+assert.equal(scripts[0][1],app,'inline app script must remain in sync with app.js');
+console.log('PASS medical and academy staff: injuries/recovery, availability, manual training, and synced app bundle');

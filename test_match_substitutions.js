@@ -1,0 +1,21 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const html=fs.readFileSync(__dirname+'/index.html','utf8');
+const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+function grab(name,next){const start=script.indexOf('function '+name+'(');assert(start>=0,`missing ${name}`);const end=script.indexOf('\nfunction '+next+'(',start+1);assert(end>=0,`missing next ${next}`);return script.slice(start,end)}
+const state={season:1,week:3,tactics:{formation:'4-3-3',style:'متعادل',positions:{},lineup:[]},squad:[],staff:{}};
+const ctx={state,rng(seed){let x=Math.sin(seed*127.1+311.7)*43758.5453;return x-Math.floor(x)},num:x=>String(x)};
+vm.createContext(ctx);
+vm.runInContext([grab('startingPlayers','league'),grab('teamMatchProfile','calculateUserSubstitutions'),grab('calculateUserSubstitutions','sampleGoals'),grab('sampleGoals','simMatch'),grab('buildMatchReport','updateSquadFitness')].join('\n'),ctx);
+state.squad=Array.from({length:14},(_,i)=>({id:`P${i}`,name:`بازیکن ${i+1}`,ovr:i<11?50+i%3:68-(i-11),position:['GK','CB','FB','DM','CM','AM','W','ST'][i%8],fitness:i<11?55+i%15:95,earnedTalents:[]}));
+state.tactics.lineup=state.squad.slice(0,11).map(p=>p.id);
+const user={id:'USER_CLUB',isHuman:true,name:'باشگاه شما',ovr:55};
+const plan=ctx.calculateUserSubstitutions(user,123);
+assert(plan.subs.length>0,'should produce actual substitutions when bench exists');
+assert(plan.subs.length<=3,'substitution cap is three');
+assert(plan.subs.every(s=>s.incoming&&s.out&&s.minute>=60),'each substitution has players and match minute');
+assert(Number.isFinite(plan.attack)&&Number.isFinite(plan.defence),'substitution impacts are numeric');
+const report=ctx.buildMatchReport(user,{id:'AI',name:'حریف'},2,1,123);
+assert.equal(report.substitutions.length,plan.subs.length);
+assert(report.events.some(e=>e.type==='substitution'),'substitutions appear in match timeline');
+assert(report.substitutions.every(s=>s.text.includes('تعویض انجام شد')),'report labels substitutions as executed');
+console.log('PASS match engine: substitutions are bounded, timed, recorded in the timeline, and expose attack/defence impact values.');
